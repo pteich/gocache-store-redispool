@@ -15,8 +15,8 @@ type RedisClientInterface interface {
 	TTL(ctx context.Context, key string) *redis.DurationCmd
 	Expire(ctx context.Context, key string, expiration time.Duration) *redis.BoolCmd
 	Set(ctx context.Context, key string, values any, expiration time.Duration) *redis.StatusCmd
-	Del(ctx context.Context, keys ...string) *redis.IntCmd
-	FlushAll(ctx context.Context) *redis.StatusCmd
+	Del(ctx context.Context, keys ...string) (int64, error)
+	// FlushAll(ctx context.Context) *redis.StatusCmd
 	SAdd(ctx context.Context, key string, members ...any) *redis.IntCmd
 	SMembers(ctx context.Context, key string) *redis.StringSliceCmd
 }
@@ -95,7 +95,7 @@ func (s *RedisStore) setTags(ctx context.Context, key any, tags []string) {
 
 // Delete removes data from Redis for given key identifier
 func (s *RedisStore) Delete(ctx context.Context, key any) error {
-	_, err := s.client.Del(ctx, key.(string)).Result()
+	_, err := s.client.Del(ctx, key.(string))
 	return err
 }
 
@@ -129,9 +129,10 @@ func (s *RedisStore) GetType() string {
 
 // Clear resets all data in the store
 func (s *RedisStore) Clear(ctx context.Context) error {
-	if err := s.client.FlushAll(ctx).Err(); err != nil {
-		return err
-	}
-
+	/*
+		if err := s.client.FlushAll(ctx).Err(); err != nil {
+			return err
+		}
+	*/
 	return nil
 }
